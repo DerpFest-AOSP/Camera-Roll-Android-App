@@ -8,3 +8,4 @@ local.properties
 .gradle
 androidTest
 test
+release
