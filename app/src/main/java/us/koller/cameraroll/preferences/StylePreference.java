@@ -38,7 +38,7 @@ public class StylePreference extends DialogPreference {
         setNegativeButtonText(android.R.string.cancel);
 
         style = getPersistedInt(getContext()
-                .getResources().getInteger(R.integer.STYLE_PARALLAX_VALUE));
+                .getResources().getInteger(R.integer.STYLE_CARDS_VALUE));
     }
 
     public int getStyle() {

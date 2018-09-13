@@ -66,7 +66,7 @@ public class Settings {
 
         style = sharedPreferences.getInt(
                 context.getString(R.string.pref_key_style),
-                context.getResources().getInteger(R.integer.STYLE_PARALLAX_VALUE));
+                context.getResources().getInteger(R.integer.STYLE_CARDS_VALUE));
 
         columnCount = sharedPreferences.getInt(
                 context.getString(R.string.pref_key_column_count),
@@ -93,7 +93,7 @@ public class Settings {
 
         cameraShortcut = sharedPreferences.getBoolean(
                 context.getString(R.string.pref_key_camera_shortcut),
-                false);
+                true);
 
         removableStorageTreeUri = Uri.parse(sharedPreferences.getString(
                 context.getString(R.string.pref_key_removable_storage_treeUri),
