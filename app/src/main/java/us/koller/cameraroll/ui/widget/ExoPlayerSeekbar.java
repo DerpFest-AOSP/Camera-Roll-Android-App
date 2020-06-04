@@ -1,8 +1,10 @@
 package us.koller.cameraroll.ui.widget;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.AppCompatSeekBar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatSeekBar;
 import android.util.AttributeSet;
 import android.widget.SeekBar;
 
@@ -24,10 +26,16 @@ public class ExoPlayerSeekbar extends AppCompatSeekBar implements TimeBar, SeekB
         super(context, attrs, defStyleAttr);
     }
 
+
     @Override
-    public void setListener(OnScrubListener listener) {
+    public void addListener(@NonNull OnScrubListener listener) {
         setOnSeekBarChangeListener(this);
         this.listener = listener;
+    }
+
+    @Override
+    public void removeListener(@NonNull OnScrubListener listener) {
+
     }
 
     @Override
@@ -53,6 +61,11 @@ public class ExoPlayerSeekbar extends AppCompatSeekBar implements TimeBar, SeekB
     @Override
     public void setDuration(long duration) {
         setMax((int) duration);
+    }
+
+    @Override
+    public long getPreferredUpdateDelay() {
+        return 0;
     }
 
     @Override

@@ -10,27 +10,21 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
 
-import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -39,14 +33,13 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.PlaybackControlView;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import us.koller.cameraroll.R;
-import us.koller.cameraroll.data.Settings;
 
 public class VideoPlayerActivity extends ThemeableActivity {
 
@@ -73,18 +66,11 @@ public class VideoPlayerActivity extends ThemeableActivity {
 
         //init Play pause button
         final ImageButton playPause = findViewById(R.id.play_pause);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            playPause.setImageResource(R.drawable.pause_to_play_avd);
-        } else {
-            playPause.setImageResource(R.drawable.ic_pause_white);
-        }
+        playPause.setImageResource(R.drawable.pause_to_play_avd);
 
-        playPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (player != null) {
-                    player.setPlayWhenReady(!player.getPlayWhenReady());
-                }
+        playPause.setOnClickListener(view -> {
+            if (player != null) {
+                player.setPlayWhenReady(!player.getPlayWhenReady());
             }
         });
 
@@ -100,11 +86,11 @@ public class VideoPlayerActivity extends ThemeableActivity {
         setWindowInsets();
 
         //hide & show Nav-/StatusBar together with controls
-        final PlaybackControlView playbackControlView = (PlaybackControlView)
+        final PlayerControlView playbackControlView = (PlayerControlView)
                 findViewById(R.id.playback_control_view).getParent();
         final View bottomBarControls = findViewById(R.id.controls);
-        playbackControlView.setVisibilityListener(
-                new PlaybackControlView.VisibilityListener() {
+        playbackControlView.addVisibilityListener(
+                new PlayerControlView.VisibilityListener() {
                     @Override
                     public void onVisibilityChange(final int i) {
                         //animate Toolbar & controls
@@ -152,52 +138,19 @@ public class VideoPlayerActivity extends ThemeableActivity {
         final Toolbar toolbar = findViewById(R.id.toolbar);
         final View bottomBarControls = findViewById(R.id.controls);
         final ViewGroup rootView = findViewById(R.id.root_view);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-            rootView.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-                @Override
-                @RequiresApi(api = Build.VERSION_CODES.KITKAT_WATCH)
-                public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
+        rootView.setOnApplyWindowInsetsListener((view, insets) -> {
+            toolbar.setPadding(insets.getSystemWindowInsetLeft(),
+                    insets.getSystemWindowInsetTop(),
+                    insets.getSystemWindowInsetRight(), 0);
 
-                    toolbar.setPadding(insets.getSystemWindowInsetLeft(),
-                            insets.getSystemWindowInsetTop(),
-                            insets.getSystemWindowInsetRight(), 0);
+            bottomBarControls.setPadding(insets.getSystemWindowInsetLeft(),
+                    0, insets.getSystemWindowInsetRight(),
+                    insets.getSystemWindowInsetBottom());
 
-                    bottomBarControls.setPadding(insets.getSystemWindowInsetLeft(),
-                            0, insets.getSystemWindowInsetRight(),
-                            insets.getSystemWindowInsetBottom());
-
-                    // clear this listener so insets aren't re-applied
-                    rootView.setOnApplyWindowInsetsListener(null);
-                    return insets.consumeSystemWindowInsets();
-                }
-            });
-        } else {
-            rootView.getViewTreeObserver()
-                    .addOnGlobalLayoutListener(
-                            new ViewTreeObserver.OnGlobalLayoutListener() {
-                                @Override
-                                public void onGlobalLayout() {
-                                    //hacky way of getting window insets on pre-Lollipop
-                                    int[] screenSize = us.koller.cameraroll.util.Util
-                                            .getScreenSize(VideoPlayerActivity.this);
-
-                                    int[] windowInsets = new int[]{
-                                            Math.abs(screenSize[0] - rootView.getLeft()),
-                                            Math.abs(screenSize[1] - rootView.getTop()),
-                                            Math.abs(screenSize[2] - rootView.getRight()),
-                                            Math.abs(screenSize[3] - rootView.getBottom())};
-
-                                    toolbar.setPadding(windowInsets[0], windowInsets[1],
-                                            windowInsets[2], 0);
-
-                                    bottomBarControls.setPadding(windowInsets[0], 0,
-                                            windowInsets[2], windowInsets[3]);
-
-                                    rootView.getViewTreeObserver()
-                                            .removeOnGlobalLayoutListener(this);
-                                }
-                            });
-        }
+            // clear this listener so insets aren't re-applied
+            rootView.setOnApplyWindowInsetsListener(null);
+            return insets.consumeSystemWindowInsets();
+        });
     }
 
     public void showOrHideSystemUi(boolean show) {
@@ -253,12 +206,12 @@ public class VideoPlayerActivity extends ThemeableActivity {
         DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(this);
 
         // Create the player
-        player = ExoPlayerFactory.newSimpleInstance(renderersFactory,
-                new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(null)),
-                new DefaultLoadControl());
+        player = new SimpleExoPlayer.Builder(this)
+                .setTrackSelector(new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(null)))
+                .build();
 
         // Bind the player to the view.
-        SimpleExoPlayerView simpleExoPlayerView = findViewById(R.id.simpleExoPlayerView);
+        PlayerView simpleExoPlayerView = findViewById(R.id.simpleExoPlayerView);
         simpleExoPlayerView.setPlayer(player);
 
         // Prepare the player with the source.
@@ -271,7 +224,7 @@ public class VideoPlayerActivity extends ThemeableActivity {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 //update PlayPause-Button
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && showAnimations()) {
+                if (showAnimations()) {
                     if (player.getPlayWhenReady()) {
                         playPause.setImageResource(R.drawable.play_to_pause_avd);
                     } else {
@@ -306,7 +259,7 @@ public class VideoPlayerActivity extends ThemeableActivity {
     @Override
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode);
-        SimpleExoPlayerView simpleExoPlayerView = findViewById(R.id.simpleExoPlayerView);
+        PlayerView simpleExoPlayerView = findViewById(R.id.simpleExoPlayerView);
         if (isInPictureInPictureMode) {
             // Hide the controls in picture-in-picture mode.
             simpleExoPlayerView.hideController();
@@ -347,11 +300,6 @@ public class VideoPlayerActivity extends ThemeableActivity {
     public static class SimpleEventListener implements Player.EventListener {
 
         @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest) {
-
-        }
-
-        @Override
         public void onTracksChanged(TrackGroupArray trackGroupArray, TrackSelectionArray trackSelectionArray) {
 
         }
@@ -373,11 +321,6 @@ public class VideoPlayerActivity extends ThemeableActivity {
 
         @Override
         public void onPlayerError(ExoPlaybackException error) {
-
-        }
-
-        @Override
-        public void onPositionDiscontinuity() {
 
         }
 

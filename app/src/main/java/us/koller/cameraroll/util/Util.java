@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -12,17 +11,15 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.Snackbar;
-import android.support.media.ExifInterface;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.content.res.AppCompatResources;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.RequiresApi;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.exifinterface.media.ExifInterface;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -153,7 +150,7 @@ public class Util {
     public static void showSnackbar(Snackbar snackbar) {
         snackbar.getView().setTag(SNACKBAR);
         TextView textView = snackbar.getView()
-                .findViewById(android.support.design.R.id.snackbar_text);
+                .findViewById(com.google.android.material.R.id.snackbar_text);
         textView.setTypeface(ResourcesCompat
                 .getFont(textView.getContext(), R.font.roboto_mono_medium));
         snackbar.show();
